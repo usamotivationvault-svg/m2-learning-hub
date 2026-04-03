@@ -1268,10 +1268,15 @@ footer p{font-size:13px;color:var(--txt2);line-height:1.8;margin-bottom:18px;}
 <!-- Success Popup -->
 <div class="popup-overlay" id="successPopup">
   <div class="popup-box">
-    <div style="font-size:56px;">🎉</div>
-    <h3>You're All Set!</h3>
-    <p>Thank you! We'll contact you within 24 hours to confirm your free demo class.<br><strong>+91 8107563723 &nbsp;|&nbsp; +91 88825 65496</strong></p>
-    <a href="https://wa.me/918107563723" class="btn btn-wa" style="width:100%;justify-content:center;margin-bottom:12px;" target="_blank">💬 Message Us on WhatsApp</a>
+    <div style="font-size:52px;margin-bottom:4px;">🎉</div>
+    <h3 style="margin-bottom:8px;">Submitted Successfully!</h3>
+    <p style="font-size:13px;color:var(--txt2);margin-bottom:18px;">Send your details to us on WhatsApp for instant confirmation. Tap either number below:</p>
+    <a id="waLink1" href="#" class="btn btn-wa" style="width:100%;justify-content:center;margin-bottom:10px;font-size:13px;" target="_blank">
+      💬 WhatsApp: +91 8107563723
+    </a>
+    <a id="waLink2" href="#" class="btn btn-wa" style="width:100%;justify-content:center;margin-bottom:16px;font-size:13px;background:linear-gradient(135deg,#128C7E,#075E54);" target="_blank">
+      💬 WhatsApp: +91 88825 65496
+    </a>
     <button onclick="document.getElementById('successPopup').classList.remove('show')" class="btn btn-outline" style="width:100%;justify-content:center;">Close</button>
   </div>
 </div>
@@ -1527,36 +1532,86 @@ window.addEventListener('resize',updateT);
 function validatePhone(p){return /^[6-9]\d{9}$/.test(p.replace(/[\s+\-]/g,''));}
 function showErr(id,msg){const el=document.getElementById(id);el.textContent=msg;el.style.display='block';setTimeout(()=>el.style.display='none',4000);}
 
-function handleEnrollSubmit(e) {
-  e.preventDefault();
-  const sn=document.getElementById('studentName').value.trim();
-  const pn=document.getElementById('parentName').value.trim();
-  const mob=document.getElementById('mobile').value.trim();
-  const board=document.getElementById('enrollBoard').value;
-  const cls=document.getElementById('enrollClass').value;
-  const sub=document.getElementById('enrollSubject').value;
-  if(!sn){showErr('enrollError','Please enter student name.');return;}
-  if(!pn){showErr('enrollError','Please enter parent name.');return;}
-  if(!validatePhone(mob)){showErr('enrollError','Please enter a valid 10-digit mobile number.');return;}
-  if(!board){showErr('enrollError','Please select a board.');return;}
-  if(!cls){showErr('enrollError','Please select a class.');return;}
-  if(!sub){showErr('enrollError','Please select a subject.');return;}
-  document.getElementById('enrollForm').reset();
+/* ---- WHATSAPP HELPER ---- */
+const WA_NUMBERS = ['918107563723', '918882565496'];
+
+function buildWALinks(message) {
+  const encoded = encodeURIComponent(message);
+  document.getElementById('waLink1').href = 'https://wa.me/' + WA_NUMBERS[0] + '?text=' + encoded;
+  document.getElementById('waLink2').href = 'https://wa.me/' + WA_NUMBERS[1] + '?text=' + encoded;
+}
+
+function showSuccessPopup(message) {
+  buildWALinks(message);
   document.getElementById('successPopup').classList.add('show');
 }
 
+/* ---- ENROLLMENT FORM ---- */
+function handleEnrollSubmit(e) {
+  e.preventDefault();
+
+  const sn    = document.getElementById('studentName').value.trim();
+  const pn    = document.getElementById('parentName').value.trim();
+  const mob   = document.getElementById('mobile').value.trim();
+  const board = document.getElementById('enrollBoard').value;
+  const cls   = document.getElementById('enrollClass').value;
+  const sub   = document.getElementById('enrollSubject').value;
+  const batch = document.getElementById('batchPref').value || 'Not specified';
+
+  if (!sn)                    { showErr('enrollError', 'Please enter student name.');              return; }
+  if (!pn)                    { showErr('enrollError', 'Please enter parent name.');               return; }
+  if (!validatePhone(mob))    { showErr('enrollError', 'Please enter a valid 10-digit mobile number.'); return; }
+  if (!board)                 { showErr('enrollError', 'Please select a board.');                  return; }
+  if (!cls)                   { showErr('enrollError', 'Please select a class.');                  return; }
+  if (!sub)                   { showErr('enrollError', 'Please select a subject.');                return; }
+
+  const message =
+    '🎓 *New Student Enrollment — M² Learning Hub*\n' +
+    '━━━━━━━━━━━━━━━━━━━━━━\n' +
+    '👤 *Student Name:*  ' + sn   + '\n' +
+    '👨‍👩‍👦 *Parent Name:*   ' + pn   + '\n' +
+    '📱 *Mobile Number:* ' + mob  + '\n' +
+    '📚 *Board / Exam:*  ' + board + '\n' +
+    '🏫 *Class:*         ' + cls  + '\n' +
+    '📖 *Subject:*       ' + sub  + '\n' +
+    '⏰ *Batch Preference:* ' + batch + '\n' +
+    '━━━━━━━━━━━━━━━━━━━━━━\n' +
+    '📅 Submitted on: ' + new Date().toLocaleString('en-IN', {dateStyle:'medium', timeStyle:'short'}) + '\n' +
+    '🔔 Please confirm enrollment at your earliest convenience.';
+
+  document.getElementById('enrollForm').reset();
+  showSuccessPopup(message);
+}
+
+/* ---- DEMO BOOKING FORM ---- */
 function handleDemoSubmit(e) {
   e.preventDefault();
-  const name=document.getElementById('demoName').value.trim();
-  const cls=document.getElementById('demoClass').value;
-  const board=document.getElementById('demoBoard').value;
-  const phone=document.getElementById('demoPhone').value.trim();
-  if(!name){showErr('demoError','Please enter student name.');return;}
-  if(!cls){showErr('demoError','Please select a class.');return;}
-  if(!board){showErr('demoError','Please select board/exam.');return;}
-  if(!validatePhone(phone)){showErr('demoError','Please enter a valid 10-digit mobile number.');return;}
+
+  const name   = document.getElementById('demoName').value.trim();
+  const cls    = document.getElementById('demoClass').value;
+  const board  = document.getElementById('demoBoard').value;
+  const phone  = document.getElementById('demoPhone').value.trim();
+  const timing = document.getElementById('demoTiming').value || 'Not specified';
+
+  if (!name)               { showErr('demoError', 'Please enter student name.');               return; }
+  if (!cls)                { showErr('demoError', 'Please select a class.');                   return; }
+  if (!board)              { showErr('demoError', 'Please select board/exam.');                return; }
+  if (!validatePhone(phone)){ showErr('demoError', 'Please enter a valid 10-digit mobile number.'); return; }
+
+  const message =
+    '📅 *Free Demo Class Booking — M² Learning Hub*\n' +
+    '━━━━━━━━━━━━━━━━━━━━━━\n' +
+    '👤 *Student Name:*  ' + name   + '\n' +
+    '🏫 *Class:*         ' + cls    + '\n' +
+    '📚 *Board / Exam:*  ' + board  + '\n' +
+    '📱 *Phone Number:*  ' + phone  + '\n' +
+    '🕐 *Preferred Time:* ' + timing + '\n' +
+    '━━━━━━━━━━━━━━━━━━━━━━\n' +
+    '📅 Submitted on: ' + new Date().toLocaleString('en-IN', {dateStyle:'medium', timeStyle:'short'}) + '\n' +
+    '🔔 Please schedule the demo class at your earliest convenience.';
+
   document.getElementById('demoForm').reset();
-  document.getElementById('successPopup').classList.add('show');
+  showSuccessPopup(message);
 }
 </script>
 </body>
